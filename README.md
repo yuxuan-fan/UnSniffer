@@ -25,11 +25,20 @@ The recently proposed open-world object and open-set detection have achieved a b
 </div>
 
 # Requirements
+在安装requirements之前先安装detectron2
+In addition, install detectron2 following [here](https://detectron2.readthedocs.io/en/latest/tutorials/install.html).
+最好还是一个一个pip
 ```bash
 pip install -r requirements.txt
 ```
-
-In addition, install detectron2 following [here](https://detectron2.readthedocs.io/en/latest/tutorials/install.html).
+wand包会遇到问题，缺少ImageMagick 
+https://docs.wand-py.org/en/latest/guide/install.html
+解决方法
+Install ImageMagick on Debian/Ubuntu
+If you’re using Linux distributions based on Debian like Ubuntu, it can be easily installed using APT:
+```bash
+sudo apt-get install libmagickwand-dev
+```
 
 # Dataset Preparation
 
