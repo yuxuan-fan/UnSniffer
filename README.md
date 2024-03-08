@@ -53,9 +53,12 @@ The VOC dataset folder should have the following structure:
 
 **COCO**
 
+```bash
 wget http://images.cocodataset.org/zips/train2017.zip
 wget http://images.cocodataset.org/zips/val2017.zip
 wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+```
+
 
 
 Please put the corresponding json files in Google Cloud Disk into ./anntoations
