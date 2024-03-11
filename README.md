@@ -11,18 +11,6 @@
 # Introduction
 
 
-[//]: # (![]&#40;https://xuefengbupt.github.io/project_page/img/unsniffer_demo1.gif&#41;)
-
-[//]: # (![]&#40;https://xuefengbupt.github.io/project_page/img/unsniffer_demo2.gif&#41;)
-
-<div id="demo" style="display: flex; justify-content: center; margin-bottom: 20px;">
-
-<img src="unsniffer_demo1.gif" width="305" style="margin-right: 30px;">
-
-<img src="unsniffer_demo2.gif" width="400" style="margin-left: 30px;">
-
-</div>
-
 # Requirements
 在安装requirements之前先安装detectron2
 
