@@ -1,4 +1,4 @@
-# Copyright (c) Facebook, Inc. and its affiliates.
+
 import logging
 import numpy as np
 from typing import Dict, List, Optional, Tuple
@@ -28,21 +28,28 @@ class GeneralizedRCNNLogisticGMM(nn.Module):
     """
     Generalized R-CNN. Any models that contains the following three components:
     1. Per-image feature extraction (aka backbone)
-    2. Region proposal generation
+    该组件负责从输入图像中提取特征。这些特征通常在卷积神经网络（CNN）中学习得到，并且用于后续的物体检测任务。
+
+    2. Region proposal generation RPN
+    该组件使用图像特征来生成物体区域的候选提议。这些提议通常是包含物体可能存在的矩形区域。
+
     3. Per-region feature extraction and prediction
+    该组件负责对每个候选区域进行特征提取，并使用这些特征来预测该区域内是否包含感兴趣的物体，以及物体的类别和边界框。
+
     """
 
+    # 构造函数
     @configurable
-    def __init__(
+    def __init__(#构造函数
         self,
         *,
         backbone: Backbone,
         proposal_generator: nn.Module,
         roi_heads: nn.Module,
-        pixel_mean: Tuple[float],
-        pixel_std: Tuple[float],
-        input_format: Optional[str] = None,
-        vis_period: int = 0,
+        pixel_mean: Tuple[float],   # 这些是输入图像的均值
+        pixel_std: Tuple[float],    # 和标准差,在模型推断时，输入图像会被标准化，即每个像素值减去均值再除以标准差，以便更好地训练模型。
+        input_format: Optional[str] = None, # 描述输入图像通道含义的字符串，这在可视化过程中可能会用到。
+        vis_period: int = 0,        # 可视化周期，即多少个步骤后运行一次可视化。如果设置为 0，则禁用可视化。
     ):
         """
         NOTE: this interface is experimental.
@@ -66,12 +73,15 @@ class GeneralizedRCNNLogisticGMM(nn.Module):
         if vis_period > 0:
             assert input_format is not None, "input_format is required for visualization!"
 
+        # 这里将 pixel_mean 和 pixel_std 注册为模型的缓冲区，这意味着它们在模型的参数列表中不可训练，但在推理时会被用来标准化输入图像。
         self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(-1, 1, 1))
         self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(-1, 1, 1))
+        # 一个断言检查确保 pixel_mean 和 pixel_std 的形状一致，以避免标准化过程中的错误。
         assert (
             self.pixel_mean.shape == self.pixel_std.shape
         ), f"{self.pixel_mean} and {self.pixel_std} have different shapes!"
 
+    # 用于从配置文件中创建模型
     @classmethod
     def from_config(cls, cfg):
         backbone = build_backbone(cfg)
@@ -85,12 +95,15 @@ class GeneralizedRCNNLogisticGMM(nn.Module):
             "pixel_std": cfg.MODEL.PIXEL_STD,
         }
 
+    # 获取模型的设备信息
     @property
     def device(self):
         return self.pixel_mean.device
 
     def visualize_training(self, batched_inputs, proposals):
         """
+        可视化训练过程中的图像和提议框（proposals）
+
         A function used to visualize images and proposals. It shows ground truth
         bounding boxes on the original image and up to 20 top-scoring predicted
         object proposals on the original image. Users can implement different
@@ -100,14 +113,16 @@ class GeneralizedRCNNLogisticGMM(nn.Module):
             proposals (list): a list that contains predicted proposals. Both
                 batched_inputs and proposals should have the same length.
         """
+
+        # 导入用于可视化的 Visualizer 类
         from detectron2.utils.visualizer import Visualizer
 
         storage = get_event_storage()
-        max_vis_prop = 20
+        max_vis_prop = 20   # 设置最大可视化的提议框数量。
 
-        for input, prop in zip(batched_inputs, proposals):
+        for input, prop in zip(batched_inputs, proposals): # 遍历批量输入和对应的提议框。
             img = input["image"]
-            img = convert_image_to_rgb(img.permute(1, 2, 0), self.input_format)
+            img = convert_image_to_rgb(img.permute(1, 2, 0), self.input_format) # 将图像转换为 RGB 格式。
             v_gt = Visualizer(img, None)
             v_gt = v_gt.overlay_instances(boxes=input["instances"].gt_boxes)
             anno_img = v_gt.get_image()
