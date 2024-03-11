@@ -13,13 +13,15 @@ from detectron2.engine.train_loop import TrainerBase
 
 class SimpleTrainer(TrainerBase):
     """
+    总的来说，SimpleTrainer 类提供了一个简单但有效的训练循环，使用户可以方便地执行基本的模型训练任务。
+    如果需要更复杂的训练逻辑，用户可以通过子类化 TrainerBase 并实现自己的 run_step 方法，或者编写自己的训练循环。
     A simple trainer for the most common type of task:
     single-cost single-optimizer single-data-source iterative optimization,
     optionally using data-parallelism.
     It assumes that every step, you:
-    1. Compute the loss with a data from the data_loader.
-    2. Compute the gradients with the above loss.
-    3. Update the model with the optimizer.
+    1. Compute the loss with a data from the data_loader. 使用 data_loader 中的数据计算损失。
+    2. Compute the gradients with the above loss. 用上述损失计算梯度。
+    3. Update the model with the optimizer. 使用优化器更新模型。
     All other tasks during training (checkpointing, logging, evaluation, LR schedule)
     are maintained by hooks, which can be registered by :meth:`TrainerBase.register_hooks`.
     If you want to do anything fancier than this,
@@ -86,6 +88,7 @@ class SimpleTrainer(TrainerBase):
 
     def _write_metrics(self, loss_dict: Dict[str, torch.Tensor], data_time: float):
         """
+        总的来说，这段代码用于在分布式训练环境中收集并汇总每个 worker 的损失值和数据加载时间，并将其存储为指标，以便监控训练过程的性能和损失情况。
         Args:
             loss_dict (dict): dict of scalar losses
             data_time (float): time taken by the dataloader iteration

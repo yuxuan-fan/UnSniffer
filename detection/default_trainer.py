@@ -1,11 +1,12 @@
-# -*- coding: utf-8 -*-
-# Copyright (c) Facebook, Inc. and its affiliates.
-
 """
 This file contains components with some default boilerplate logic user may need
 in training / testing. They will not work for everyone, but many users may find them useful.
 The behavior of functions/classes in this file is subject to change,
 since they are meant to represent the "common default behavior" people need in their projects.
+
+换句话说，这个文件中的代码提供了一些常见的功能实现，比如训练过程中的指标记录、数据加载、模型保存等，这些功能是许多项目中都会涉及到的。
+但由于不同项目的需求可能有所不同，用户可能需要根据自己的情况进行修改和定制。
+因此，这些组件的具体行为可能会根据项目需求而变化，用户在使用时需要注意这一点。
 """
 import os
 from collections import OrderedDict

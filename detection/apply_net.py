@@ -30,10 +30,17 @@ from detectron2.data.detection_utils import read_image
 
 
 def extract_ID(outputs):
+    # 这段代码定义了一个名为extract_ID的函数，该函数用于从给定的outputs中提取特定的信息，
+    # 并将提取的信息存储在一个名为inst_ID的对象中。
+
+    #通过使用Instances类，创建了一个名为inst_ID的实例，该实例具有与outputs图像大小相同的尺寸。
     inst_ID = Instances((outputs.image_size[0], outputs.image_size[1]))
+    #提取预测类别：从outputs中获取预测的类别信息，
+    # 并使用torch.where函数找到那些类别不等于81的索引。类别为81通常表示背景。
     pred_classes = outputs.pred_classes
     keepindex = torch.where(pred_classes!=81)
 
+    #根据索引更新inst_ID的属性
     inst_ID.pred_boxes = outputs.pred_boxes[keepindex]
     inst_ID.scores = outputs.scores[keepindex]
     inst_ID.pred_classes = outputs.pred_classes[keepindex]
@@ -42,10 +49,13 @@ def extract_ID(outputs):
     inst_ID.det_labels = outputs.det_labels[keepindex]
     inst_ID.pred_boxes_covariance = outputs.pred_boxes_covariance[keepindex]
     inst_ID.complete_scores = outputs.complete_scores[keepindex]
+    # 总体而言，该函数的目的是通过从outputs中选择特定类别的预测信息，创建一个新的inst_ID对象，
+    # 该对象包含了筛选后的相关信息，可能用于进一步的处理或分析。
     return inst_ID
 
 
 def main(args):
+    #这是一个Python脚本的主函数，主要用于在目标检测模型上进行推理测试。
     # Setup config
     cfg = setup_config(args,
                        random_seed=args.random_seed,
@@ -139,6 +149,7 @@ def main(args):
 
 
 if __name__ == "__main__":
+    # 一个典型的 Python 脚本的入口点
     # Create arg parser
     arg_parser = setup_arg_parser()
     args = arg_parser.parse_args()
