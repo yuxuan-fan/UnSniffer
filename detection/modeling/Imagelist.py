@@ -24,6 +24,7 @@ def _as_tensor(x: Tuple[int, int]) -> torch.Tensor:
 
 class ImageList(object):
     """
+    在plain_generalized_rcnn_logistic_gmm的train中有用到,图像批处理
     这段代码定义了一个名为 ImageList 的类，它是一个数据结构，用于将一组图像（可能具有不同的尺寸）存储为一个张量。
     这个类的主要目的是为了方便地管理一组图像数据，通过填充和尺寸存储功能，使它们能够以单个张量的形式进行处理。
 

@@ -1,3 +1,5 @@
+
+
 import logging
 import numpy as np
 import torch
@@ -35,10 +37,17 @@ device = torch.device(
 @META_ARCH_REGISTRY.register()
 class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
     """
+    继承GeneralizedRCNN
     Probabilistic GeneralizedRCNN class.
+    实现概率通用RCNN
+    这种模型可能是对传统的通用RCNN进行了改进，引入了概率性建模的思想。
+    这意味着模型不仅输出单个类别的预测，还输出了与每个预测相关的概率分布。
+    这样做的目的是提高模型的鲁棒性，增强其对不确定性的处理能力。
+
     """
 
     def __init__(self, cfg):
+        # 调用父类的初始化方法，将配置参数 cfg 传递给父类，以完成模型的初始化。
         super().__init__(cfg)
 
         # Parse configs
@@ -51,6 +60,7 @@ class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
         self.bbox_cov_num_samples = cfg.MODEL.PROBABILISTIC_MODELING.BBOX_COV_LOSS.NUM_SAMPLES
 
         self.bbox_cov_type = cfg.MODEL.PROBABILISTIC_MODELING.BBOX_COV_LOSS.COVARIANCE_TYPE
+        # 确定了边界框协方差矩阵的维度
         if self.bbox_cov_type == 'diagonal':
             # Diagonal covariance matrix has N elements
             self.bbox_cov_dims = 4
@@ -59,13 +69,18 @@ class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
             # computed as:  (N * (N + 1)) / 2
             self.bbox_cov_dims = 10
 
+        # 从配置参数中获取了模型的 dropout 率。
         self.dropout_rate = cfg.MODEL.PROBABILISTIC_MODELING.DROPOUT_RATE
+        # 是否使用 dropout
         self.use_dropout = self.dropout_rate != 0.0
+        # 初始化为 -1。这个变量可能用于控制 Monte Carlo Dropout 的运行次数，但在这里设置为 -1 可能表示使用默认值或者后续会被其他值覆盖。
         self.num_mc_dropout_runs = -1
 
         self.current_step = 0
 
         # Define custom probabilistic head
+        # 这段代码定义了一个自定义的概率化头部，并将其设置为概率化通用RCNN模型的区域兴趣头部（ROI Heads）中的边界框预测器。
+        # 这段代码用于定义并初始化概率化通用RCNN模型的概率化头部，并将模型发送到设备上以进行后续的训练或推理。
         self.roi_heads.box_predictor = ProbabilisticFastRCNNOutputLayers(
             cfg,
             self.roi_heads.box_head.output_shape,
@@ -86,6 +101,9 @@ class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
                 return_anchorwise_output=False,
                 num_mc_dropout_runs=-1):
         """
+
+        总的来说，这段代码实现了概率化通用RCNN模型的前向传播逻辑，
+        包括正常的训练模式下的前向传播以及 Monte Carlo Dropout 运行时的多次前向传播。
         Args:
             batched_inputs: a list, batched outputs of :class:`DatasetMapper` .
                 Each item in the list contains the inputs for one image.
@@ -163,7 +181,7 @@ class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
 
     def produce_raw_output(self, batched_inputs, detected_instances=None):
         """
-        Run inference on the given inputs and return proposal-wise output for later postprocessing.
+        用于在给定输入上运行推理并返回每个提议（proposal）的原始输出，以供后续后处理使用。
 
         Args:
             batched_inputs (list[dict]): same as in :meth:`forward`
@@ -176,12 +194,13 @@ class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
         Returns:
             same as in :meth:`forward`.
         """
-        raw_output = dict()
 
-        images = self.preprocess_image(batched_inputs)
-        features = self.backbone(images.tensor)
+        raw_output = dict()  # 初始化一个空的字典 raw_output，用于存储原始输出。
 
-        if detected_instances is None:
+        images = self.preprocess_image(batched_inputs)# 预处理
+        features = self.backbone(images.tensor)# backbone
+
+        if detected_instances is None:# 同RCNN
             if self.proposal_generator:
                 proposals, _ = self.proposal_generator(images, features, None)
             else:
@@ -192,6 +211,9 @@ class ProbabilisticGeneralizedRCNN(GeneralizedRCNN):
             # Create raw output dictionary
             raw_output.update({'proposals': proposals[0]})
 
+            # 使用区域兴趣头部预测结果，
+            # 并将 produce_raw_output 和 num_mc_dropout_runs 参数设置为 True 和 self.num_mc_dropout_runs，
+            # 以指示需要产生原始输出和进行多次 Monte Carlo Dropout 运行。
             results, _ = self.roi_heads(
                 images, features, proposals, None, produce_raw_output=True, num_mc_dropout_runs=self.num_mc_dropout_runs)
         else:
