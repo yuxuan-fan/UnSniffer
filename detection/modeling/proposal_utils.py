@@ -34,22 +34,19 @@ def find_top_rpn_proposals1(
     apply NMS, clip proposals, and remove small boxes. Return the `post_nms_topk`
     highest scoring proposals among all the feature maps for each image.
     Args:
-        proposals (list[Tensor]): A list of L tensors. Tensor i has shape (N, Hi*Wi*A, 4).
-            All proposal predictions on the feature maps.
-        pred_objectness_logits (list[Tensor]): A list of L tensors. Tensor i has shape (N, Hi*Wi*A).
-        image_sizes (list[tuple]): sizes (h, w) for each image
+        proposals (list[Tensor]): 一个包含了多个张量的列表。每个张量表示一个特征图上的所有候选框（region proposals）。
+        张量的形状为 (N, Hi*Wi*A, 4)，其中 N 是批量大小，Hi 和 Wi 是特征图的高度和宽度，A 是每个位置生成的候选框的数量，
+        4 表示每个候选框的坐标信息（通常是左上角和右下角坐标）。
+
+        pred_objectness_logits (list[Tensor]): 这也是一个包含多个张量的列表，
+        每个张量对应一个特征图上的预测目标性（objectness）的逻辑回归分数。张量的形状为 (N, Hi*Wi*A)。
+
         nms_thresh (float): IoU threshold to use for NMS
-        pre_nms_topk (int): number of top k scoring proposals to keep before applying NMS.
-            When RPN is run on multiple feature maps (as in FPN) this number is per
-            feature map.
-        post_nms_topk (int): number of top k scoring proposals to keep after applying NMS.
-            When RPN is run on multiple feature maps (as in FPN) this number is total,
-            over all feature maps.
-        min_box_size (float): minimum proposal box side length in pixels (absolute units
-            wrt input images).
-        training (bool): True if proposals are to be used in training, otherwise False.
-            This arg exists only to support a legacy bug; look for the "NB: Legacy bug ..."
-            comment.
+
+        pre_nms_topk (int): 在应用NMS之前要保留的得分最高的候选框数量。当RPN在多个特征图上运行时（如在FPN中），此数字是每个特征图的数量。
+        post_nms_topk (int): 在应用NMS之后要保留的得分最高的候选框数量。当RPN在多个特征图上运行时（如在FPN中），此数字是所有特征图的总数。
+        min_box_size (float): 候选框的最小边长，以像素为单位。小于此长度的候选框将被删除。
+        training (bool): 个布尔值，指示是否将候选框用于训练。这个参数存在是为了解决一个旧版本中的bug，如果是训练过程中使用候选框，则设为True，否则设为False。
     Returns:
         list[Instances]: list of N Instances. The i-th Instances
             stores post_nms_topk object proposals for image i, sorted by their
@@ -58,7 +55,7 @@ def find_top_rpn_proposals1(
     num_images = len(image_sizes)
     device = proposals[0].device
 
-    # 1. Select top-k anchor for every level and every image
+    # 1. 选择得分最高的 pre_nms_topk 个候选框。
     topk_scores = []  # #lvl Tensor, each of shape N x topk
     topk_proposals = []
     level_ids = []  # #lvl Tensor, each of shape (topk,)
@@ -138,6 +135,7 @@ def find_top_rpn_proposals1(
 
 def add_ground_truth_to_proposals(gt_boxes, proposals):
     """
+    这个函数的主要作用是将真实边界框添加到提议框中，以便在后续的处理中使用。
     Call `add_ground_truth_to_proposals_single_image` for all images.
     Args:
         gt_boxes(list[Boxes]): list of N elements. Element i is a Boxes

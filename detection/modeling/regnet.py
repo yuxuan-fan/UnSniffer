@@ -16,6 +16,10 @@ from detectron2.layers import (
 
 # train.cudnn_benchmark = True
 
+# 这段代码定义了一个函数 build_regnet_fpn_backbone，
+# 该函数用于构建一个具有 RegNet 架构和特征金字塔网络（FPN）的主干（backbone）模型，
+# 并且将其注册到了 Detectron2 的 BACKBONE_REGISTRY 中。
+
 @BACKBONE_REGISTRY.register()
 def build_regnet_fpn_backbone(cfg, input_shape: ShapeSpec):
     """
@@ -53,6 +57,8 @@ def build_regnet_fpn_backbone(cfg, input_shape: ShapeSpec):
 @BACKBONE_REGISTRY.register()
 def build_regnetx_fpn_backbone(cfg, input_shape: ShapeSpec):
     """
+
+    也是用于构建具有 RegNetX 架构和特征金字塔网络（FPN）的主干（backbone）模型，并将其注册到 Detectron2 的 BACKBONE_REGISTRY 中。
     Args:
         cfg: a detectron2 CfgNode
     Returns:
