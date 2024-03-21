@@ -1,4 +1,4 @@
-﻿# Unknown Sniffer for Object Detection: Don’t Turn a Blind Eye to Unknown Objects (CVPR 2023)
+﻿# 复现Unknown Sniffer
 
 
 #### [Wenteng Liang](https://github.com/Went-Liang)<sup>\*</sup>, [Feng Xue](https://xuefeng-cvr.github.io/)<sup>\*</sup>, [Yihao Liu](https://github.com/howtoloveyou), [Guofeng Zhong](), [Anlong Ming](https://teacher.bupt.edu.cn/mal) ####
